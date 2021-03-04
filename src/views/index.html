@@ -45,7 +45,7 @@
       let hour = document.getElementById("hour");
 
       function actualizar() {
-        fetch("http://http://prister.ddns.net/api/datos", {
+        fetch("http://localhost:13550/api/datos", {
           method: "get",
         })
           .then((response) => response.json())
