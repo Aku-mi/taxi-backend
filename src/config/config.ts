@@ -8,6 +8,6 @@ export default {
     URI: process.env.MONGODB_URI || "mongodb://localhost/gps",
   },
   CORS: {
-    ORIGIN: ["http://akumi.me:3000", "http://localhost:3000"],
+    ORIGIN: "*",
   },
 };
