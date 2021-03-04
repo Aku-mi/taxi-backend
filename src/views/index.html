@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coordenadas</title>
+    <link rel="stylesheet" href="./styles.css"> 
+  </head>
+
+  <body>
+    <div>
+      <h1>Coordenadas del dispositivo</h1>
+          <table>
+          <caption>Parámetros geolocalización  
+          </caption>
+       <tr>
+         <th>LATITUD</th>
+         <td ><p id="lat"> Lose</p> </td>
+       </tr>
+    
+       <tr>
+         <th>LONGITUD</th>
+         <td><p id="lng"> Lose</p></td> 
+       </tr>
+  
+       <tr>
+         <th>FECHA</th>
+         <td><p id="tmp"> Lose</p></td>
+       </tr>
+  
+       <tr>
+         <th>HORA</th>
+         <td> <p id="hour"> Lose</p></td>
+       </tr>
+      </table>
+      </div>
+
+    <script type="text/javascript">
+      let lat = document.getElementById("lat");
+      let lng = document.getElementById("lng");
+      let tmp = document.getElementById("tmp");
+      let hour = document.getElementById("hour");
+
+      function actualizar() {
+        fetch("http://http://prister.ddns.net/api/datos", {
+          method: "get",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            
+          lat.innerHTML=data.data.lat;
+          lng.innerHTML=data.data.lng;
+          tmp.innerHTML=new Date(data.data.tmp).toLocaleDateString();
+          hour.innerHTML=new Date(data.data.tmp).toLocaleTimeString();
+          
+          })
+          .catch((e) => console.log(e));
+        }
+      //Función para actualizar cada 5 segundos(5000 milisegundos)
+      setInterval("actualizar()", 5000);
+      window.addEventListener("load",actualizar)
+    </script>
+  </body>
+</html>
+

@@ -68,6 +68,17 @@ class IndexController {
     const data: Data[] = await Data_.find();
     res.status(200).json({ data: data[data.length - 1] });
   }
+
+  public async enviarData(req: Request, res: Response): Promise<void> {
+    const { lat, lng, tmp } = req.body;
+    const data = new Data_({
+      lat,
+      lng,
+      tmp,
+    });
+    await data.save();
+    res.status(200).json({ ok: true });
+  }
 }
 
 export const indexController = new IndexController();

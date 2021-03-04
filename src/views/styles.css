@@ -1,0 +1,44 @@
+h1 {
+    text-align:center;
+    color: black;
+    text-shadow: 1px 1px 1px black;
+    padding-top: 20px;
+    background-color: rgb(224, 255, 204);
+
+}
+
+table{
+   margin-top: 120px;
+   caption-side: bottom;
+   margin-left: auto;
+   margin-right: auto;
+   border-collapse: collapse;
+   background-image: linear-gradient(to right, yellow,white);
+   box-shadow: 5px 5px 5px gray;
+}
+
+caption{
+    padding-top:10px;
+    font-style:italic;
+    font-size: large;
+}
+
+th{
+    background-color: rgb(251, 255, 0);
+    color: black;
+}
+
+td,th{
+    border:2px solid black;
+    padding-left:80px;
+    padding-right:80px;
+    padding-top:10px;
+    padding-bottom:10px;
+}
+
+div{
+   margin:auto; 
+   width:960px;
+   height:600px;
+   background-color:cyan;
+}

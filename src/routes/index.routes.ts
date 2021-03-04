@@ -9,6 +9,8 @@ router.get("/", indexController.index);
 
 router.get("/datos", indexController.datos);
 
+router.post("/enviar-data", indexController.enviarData);
+
 router.post("/refresh_token", indexController.refreshToken);
 
 router.post("/revoke_tokens/:id", indexController.revokeRefreshTokens);
