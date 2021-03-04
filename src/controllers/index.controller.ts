@@ -4,6 +4,9 @@ import config from "../config/config";
 import { cookieConf, createAcessToken, createRefreshToken } from "../libs/auth";
 import { Payload, User } from "../libs/interfaces";
 import User_ from "../models/user";
+
+import Data_ from "../models/data";
+import { Data } from "../libs/interfaces";
 //test
 class IndexController {
   public index(_req: Request, res: Response): void {
@@ -59,6 +62,11 @@ class IndexController {
     } else {
       res.json({ ok: false });
     }
+  }
+
+  public async datos(_req: Request, res: Response): Promise<void> {
+    const data: Data[] = await Data_.find();
+    res.status(200).json({ data: data[data.length - 1] });
   }
 }
 
