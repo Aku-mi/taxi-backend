@@ -17,7 +17,7 @@ export const insert = async (
 ) => {
   const res = await pool.query(
     "INSERT INTO data (lat,lng,tmp,uid) VALUES ($1, $2, $3, $4)",
-    [parseInt(lat), parseInt(lng), parseInt(tmp), uid]
+    [parseFloat(lat), parseFloat(lng), parseInt(tmp), uid]
   );
   return res.rows[0];
 };
