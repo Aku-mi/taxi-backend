@@ -1,29 +1,21 @@
 import { Request, Response } from "express";
-import Data_ from "../models/data";
-import User_ from "../models/user";
-import { Data, User } from "../libs/interfaces";
+import { Data } from "../libs/interfaces";
+import * as psql from "../database/psql";
 
 class DataController {
   public async index(req: Request, res: Response): Promise<void> {
     const { user } = req.params;
     if (req.user === user) {
-      const data: Data[] = (await User_.findById(req.id).populate("data")).data;
+      const data: Data[] = await psql.getByUid(req.id);
       if (data) {
-        const _data: Data[] = data.sort((a, b) => {
-          if (a.tmp && b.tmp) return b.tmp - a.tmp;
-          else return 2;
-        });
-
-        const toSend = _data.map((d) => {
-          return {
-            lat: d.lat,
-            lng: d.lng,
-            tmp: d.tmp,
-            id: d._id,
-          };
-        });
-
-        res.json({ ok: true, data: toSend });
+        const _data: Data[] = data.filter((d) => ({
+          id: d.id,
+          lat: parseFloat(d.lat),
+          lng: parseFloat(d.lng),
+          tmp: d.tmp,
+          uid: d.uid,
+        }));
+        res.json({ ok: true, data: _data.reverse() });
       } else {
         res.json({ ok: false });
       }
@@ -35,15 +27,15 @@ class DataController {
   public async details(req: Request, res: Response): Promise<void> {
     const { user, id } = req.params;
     if (req.user === user) {
-      const data: Data = await Data_.findById(id);
-      if (data) {
+      const _data: Data = await psql.getById(id);
+      if (_data) {
         res.json({
           ok: true,
           data: {
-            lat: data.lat,
-            lng: data.lng,
-            tmp: data.tmp,
-            id: data._id,
+            id: _data.id,
+            lat: parseFloat(_data.lat),
+            lng: parseFloat(_data.lng),
+            tmp: _data.tmp,
           },
         });
       } else {
@@ -58,17 +50,16 @@ class DataController {
     const { user } = req.params;
     if (req.user === user) {
       try {
-        const data: Data[] = await Data_.find()
-          .sort({ createdAt: -1 })
-          .limit(1);
+        const data: Data[] = await psql.getByUid(req.id);
+
         if (data) {
           res.json({
             ok: true,
             data: {
-              id: data[0]._id,
-              lat: data[0].lat,
-              lng: data[0].lng,
-              tmp: data[0].tmp,
+              id: data[data.length - 1].id,
+              lat: parseFloat(data[data.length - 1].lat),
+              lng: parseFloat(data[data.length - 1].lng),
+              tmp: data[data.length - 1].tmp,
             },
           });
         } else {
@@ -88,22 +79,14 @@ class DataController {
     const { user } = req.params;
     if (req.user === user) {
       const { lat, lng, tmp } = req.body;
-      const user: User = await User_.findById(req.id).populate("data");
-      const data: Data = new Data_({
-        lat,
-        lng,
-        tmp,
-      });
-      await data.save();
-      user.data.push(data);
-      await user.save();
+      const _data: Data = await psql.insert(lat, lng, tmp, req.id);
       res.json({
         ok: true,
         data: {
-          lat: data.lat,
-          lng: data.lng,
-          tmp: data.tmp,
-          id: data._id,
+          id: _data.id,
+          lat: parseFloat(_data.lat),
+          lng: parseFloat(_data.lng),
+          tmp: _data.tmp,
         },
       });
     } else {
@@ -113,15 +96,15 @@ class DataController {
   public async delete(req: Request, res: Response): Promise<void> {
     const { user, id } = req.params;
     if (req.user === user) {
-      const data: Data = await Data_.findByIdAndDelete(id);
-      if (data) {
+      const _data: Data = await psql.deleteById(id);
+      if (_data) {
         res.json({
           ok: true,
           data: {
-            lat: data.lat,
-            lng: data.lng,
-            tmp: data.tmp,
-            id: data._id,
+            id: _data.id,
+            lat: parseFloat(_data.lat),
+            lng: parseFloat(_data.lng),
+            tmp: _data.tmp,
           },
         });
       } else {
@@ -135,13 +118,8 @@ class DataController {
   public async deleteAll(req: Request, res: Response): Promise<void> {
     const { user } = req.params;
     if (req.user === user) {
-      const data: Data[] = (await User_.findById(req.id)).data;
-      if (data) {
-        data.forEach(async (d) => await Data_.findByIdAndDelete(d._id));
-        res.json({ ok: true });
-      } else {
-        res.json({ ok: false });
-      }
+      const _: Data[] = await psql.deleteByUid(req.id);
+      res.json({ ok: true });
     } else {
       res.json({ ok: false });
     }

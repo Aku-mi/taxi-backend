@@ -4,10 +4,9 @@ import config from "../config/config";
 import { cookieConf, createAcessToken, createRefreshToken } from "../libs/auth";
 import { Payload, User } from "../libs/interfaces";
 import User_ from "../models/user";
-
-import Data_ from "../models/data";
+import * as psql from "../database/psql";
 import { Data } from "../libs/interfaces";
-//test
+
 class IndexController {
   public index(_req: Request, res: Response): void {
     res.json({
@@ -65,18 +64,22 @@ class IndexController {
   }
 
   public async datos(_req: Request, res: Response): Promise<void> {
-    const data: Data[] = await Data_.find();
-    res.status(200).json({ data: data[data.length - 1] });
+    const data: Data[] = await psql.getAll();
+    const _data = data[data.length - 1];
+    res.status(200).json({
+      data: {
+        lat: parseFloat(_data.lat),
+        lng: parseFloat(_data.lng),
+        tmp: _data.tmp,
+      },
+    });
   }
 
   public async enviarData(req: Request, res: Response): Promise<void> {
     const { lat, lng, tmp } = req.body;
-    const data = new Data_({
-      lat,
-      lng,
-      tmp,
-    });
-    await data.save();
+
+    const _: Data = await psql.insert(lat, lng, tmp, "test");
+
     res.status(200).json({ ok: true });
   }
 }
