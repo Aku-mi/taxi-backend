@@ -17,7 +17,7 @@ export default {
   CORS: {
     ORIGIN: [
       "*",
-      "http://localhost:13550",
+      "http://localhost:3000",
       "http://akumi.me",
       "http://prister.ddns.net",
     ],
