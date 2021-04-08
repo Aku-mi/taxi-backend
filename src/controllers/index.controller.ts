@@ -140,7 +140,7 @@ class IndexController {
   }
 
   public async timeSet(req: Request, res: Response): Promise<void> {
-    const { date }: { date: { tmp1: number; tmp2: number } } = req.body;
+    const { tmp1, tmp2 } = req.body;
     const _data: Data[] = await psql.getAll();
     const data_ = _data.map((d) => {
       return {
@@ -194,7 +194,7 @@ class IndexController {
     let _data_ = [];
 
     for (let i = 0; i < data.length; i++) {
-      if (data[i].tmp > date.tmp1 && data[i].tmp < date.tmp2) {
+      if (data[i].tmp > tmp1 && data[i].tmp < tmp2) {
         _data_.push(data[i]);
       }
     }
