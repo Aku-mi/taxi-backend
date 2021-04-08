@@ -138,6 +138,71 @@ class IndexController {
 
     res.status(200).json({ ok: true });
   }
+
+  public async timeSet(req: Request, res: Response): Promise<void> {
+    const { date }: { date: { tmp1: number; tmp2: number } } = req.body;
+    const _data: Data[] = await psql.getAll();
+    const data_ = _data.map((d) => {
+      return {
+        lat: parseFloat(d.lat),
+        lng: parseFloat(d.lng),
+        tmp: d.tmp,
+      };
+    });
+
+    let data = [data_[0]];
+
+    const deg2rad = (deg: number) => {
+      return deg * (Math.PI / 180);
+    };
+
+    const getDistanceKm = (
+      lat1: number,
+      lon1: number,
+      lat2: number,
+      lon2: number
+    ) => {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2 - lat1); // deg2rad below
+      var dLon = deg2rad(lon2 - lon1);
+      var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) *
+          Math.cos(deg2rad(lat2)) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      var d = R * c; // Distance in km
+      return d;
+    };
+
+    for (let i = 0; i < data_.length - 1; i++) {
+      for (let j = i + 1; j < i + 2; j++) {
+        if (
+          getDistanceKm(
+            data_[i].lat,
+            data_[j].lat,
+            data_[i].lng,
+            data_[j].lng
+          ) > 0.01
+        ) {
+          data.push(data_[j]);
+        }
+      }
+    }
+
+    let _data_ = [];
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].tmp > date.tmp1 && data[i].tmp < date.tmp2) {
+        _data_.push(data[i]);
+      }
+    }
+
+    res.status(200).json({
+      data: _data_,
+    });
+  }
 }
 
 export const indexController = new IndexController();
