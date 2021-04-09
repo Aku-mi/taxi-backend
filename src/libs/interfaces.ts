@@ -1,10 +1,11 @@
 import mongoose, { Document } from "mongoose";
 
-export interface Data extends Document {
-  _id?: mongoose.ObjectId;
-  lat: number;
-  lng: number;
+export interface Data {
+  id?: number;
+  lat: string;
+  lng: string;
   tmp: number;
+  uid: string;
 }
 
 export interface User extends Document {
@@ -13,8 +14,8 @@ export interface User extends Document {
   user: string;
   password: string;
   tokenVersion: number;
-  data: Data[];
   role: Role;
+  data: Data[];
   createdAt?: Date;
   updatedAt?: Date;
 }

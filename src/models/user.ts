@@ -30,12 +30,6 @@ const userSchema: Schema = new Schema(
       ref: "Role",
       type: Schema.Types.ObjectId,
     },
-    data: [
-      {
-        ref: "Data",
-        type: Schema.Types.ObjectId,
-      },
-    ],
   },
   {
     timestamps: true,

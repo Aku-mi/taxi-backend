@@ -1,29 +1,61 @@
 import { Request, Response } from "express";
-import Data_ from "../models/data";
-import User_ from "../models/user";
-import { Data, User } from "../libs/interfaces";
+import { Data } from "../libs/interfaces";
+import * as psql from "../database/psql";
 
 class DataController {
   public async index(req: Request, res: Response): Promise<void> {
     const { user } = req.params;
     if (req.user === user) {
-      const data: Data[] = (await User_.findById(req.id).populate("data")).data;
-      if (data) {
-        const _data: Data[] = data.sort((a, b) => {
-          if (a.tmp && b.tmp) return b.tmp - a.tmp;
-          else return 2;
-        });
+      const _data: Data[] = await psql.getByUid(req.id);
+      if (_data) {
+        const data_ = _data.map((d) => ({
+          lat: parseFloat(d.lat),
+          lng: parseFloat(d.lng),
+          tmp: d.tmp,
+        }));
 
-        const toSend = _data.map((d) => {
-          return {
-            lat: d.lat,
-            lng: d.lng,
-            tmp: d.tmp,
-            id: d._id,
-          };
-        });
+        let data = [data_[0]];
 
-        res.json({ ok: true, data: toSend });
+        const deg2rad = (deg: number) => {
+          return deg * (Math.PI / 180);
+        };
+
+        const getDistanceKm = (
+          lat1: number,
+          lon1: number,
+          lat2: number,
+          lon2: number
+        ) => {
+          var R = 6371; // Radius of the earth in km
+          var dLat = deg2rad(lat2 - lat1); // deg2rad below
+          var dLon = deg2rad(lon2 - lon1);
+          var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) *
+              Math.cos(deg2rad(lat2)) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          var d = R * c; // Distance in km
+          return d;
+        };
+
+        for (let i = 0; i < data_.length - 1; i++) {
+          for (let j = i + 1; j < i + 2; j++) {
+            if (
+              getDistanceKm(
+                data_[i].lat,
+                data_[j].lat,
+                data_[i].lng,
+                data_[j].lng
+              ) > 0.01
+            ) {
+              data.push(data_[j]);
+            }
+          }
+        }
+
+        res.json({ ok: true, data });
       } else {
         res.json({ ok: false });
       }
@@ -35,15 +67,15 @@ class DataController {
   public async details(req: Request, res: Response): Promise<void> {
     const { user, id } = req.params;
     if (req.user === user) {
-      const data: Data = await Data_.findById(id);
-      if (data) {
+      const _data: Data = await psql.getById(id);
+      if (_data) {
         res.json({
           ok: true,
           data: {
-            lat: data.lat,
-            lng: data.lng,
-            tmp: data.tmp,
-            id: data._id,
+            id: _data.id,
+            lat: parseFloat(_data.lat),
+            lng: parseFloat(_data.lng),
+            tmp: _data.tmp,
           },
         });
       } else {
@@ -58,17 +90,16 @@ class DataController {
     const { user } = req.params;
     if (req.user === user) {
       try {
-        const data: Data[] = await Data_.find()
-          .sort({ createdAt: -1 })
-          .limit(1);
+        const data: Data[] = await psql.getByUid(req.id);
+
         if (data) {
           res.json({
             ok: true,
             data: {
-              id: data[0]._id,
-              lat: data[0].lat,
-              lng: data[0].lng,
-              tmp: data[0].tmp,
+              id: data[data.length - 1].id,
+              lat: parseFloat(data[data.length - 1].lat),
+              lng: parseFloat(data[data.length - 1].lng),
+              tmp: data[data.length - 1].tmp,
             },
           });
         } else {
@@ -88,22 +119,14 @@ class DataController {
     const { user } = req.params;
     if (req.user === user) {
       const { lat, lng, tmp } = req.body;
-      const user: User = await User_.findById(req.id).populate("data");
-      const data: Data = new Data_({
-        lat,
-        lng,
-        tmp,
-      });
-      await data.save();
-      user.data.push(data);
-      await user.save();
+      const _data: Data = await psql.insert(lat, lng, tmp, req.id);
       res.json({
         ok: true,
         data: {
-          lat: data.lat,
-          lng: data.lng,
-          tmp: data.tmp,
-          id: data._id,
+          id: _data.id,
+          lat: parseFloat(_data.lat),
+          lng: parseFloat(_data.lng),
+          tmp: _data.tmp,
         },
       });
     } else {
@@ -113,15 +136,15 @@ class DataController {
   public async delete(req: Request, res: Response): Promise<void> {
     const { user, id } = req.params;
     if (req.user === user) {
-      const data: Data = await Data_.findByIdAndDelete(id);
-      if (data) {
+      const _data: Data = await psql.deleteById(id);
+      if (_data) {
         res.json({
           ok: true,
           data: {
-            lat: data.lat,
-            lng: data.lng,
-            tmp: data.tmp,
-            id: data._id,
+            id: _data.id,
+            lat: parseFloat(_data.lat),
+            lng: parseFloat(_data.lng),
+            tmp: _data.tmp,
           },
         });
       } else {
@@ -135,13 +158,8 @@ class DataController {
   public async deleteAll(req: Request, res: Response): Promise<void> {
     const { user } = req.params;
     if (req.user === user) {
-      const data: Data[] = (await User_.findById(req.id)).data;
-      if (data) {
-        data.forEach(async (d) => await Data_.findByIdAndDelete(d._id));
-        res.json({ ok: true });
-      } else {
-        res.json({ ok: false });
-      }
+      const _: Data[] = await psql.deleteByUid(req.id);
+      res.json({ ok: true });
     } else {
       res.json({ ok: false });
     }
