@@ -7,14 +7,6 @@ const router: Router = Router();
 
 router.get("/", indexController.index);
 
-router.get("/datos", indexController.datos);
-
-router.get("/datos2", indexController.datos2);
-
-router.post("/enviar-data", indexController.enviarData);
-
-router.post("/time-set", indexController.timeSet);
-
 router.post("/refresh_token", indexController.refreshToken);
 
 router.post("/revoke_tokens/:id", indexController.revokeRefreshTokens);

@@ -5,7 +5,12 @@ import { CookieOptions } from "express";
 
 export const createAcessToken = (user: User): string => {
   return sign(
-    { user: user.user, _id: user._id, role: user.role.name },
+    {
+      user: user.user,
+      _id: user._id,
+      role: user.role.name,
+      tokenVersion: user.tokenVersion,
+    },
     config.JWT.ACCESS,
     {
       expiresIn: "15m",

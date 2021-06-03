@@ -15,7 +15,6 @@ export interface User extends Document {
   password: string;
   tokenVersion: number;
   role: Role;
-  data: Data[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -24,9 +23,9 @@ export interface Payload {
   user: string;
   _id: string;
   role: string;
+  tokenVersion: number;
   iat: number;
   exp: number;
-  tokenVersion: number;
 }
 
 export interface Role extends mongoose.Document {

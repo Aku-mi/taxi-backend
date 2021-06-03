@@ -1,1 +1,1 @@
-## Back-end for the geo-location mobile app and web app.
+## Back-end for the geo-location movile app and web app.

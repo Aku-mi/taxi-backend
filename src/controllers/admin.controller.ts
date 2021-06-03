@@ -15,7 +15,6 @@ class AdminController {
                 name: u.name,
                 id: u._id,
                 user: u.user,
-                data: u.data,
                 role: u.role.name,
               };
             }

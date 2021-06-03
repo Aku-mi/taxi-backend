@@ -4,7 +4,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import config from "./config/config";
 import { createRoles } from "./libs/initialSetup";
-import path from "path";
 
 //import Routes
 import indexRoutes from "./routes/index.routes";
@@ -31,11 +30,5 @@ app.use(express.json());
 
 //Routes
 app.use("/api", indexRoutes);
-
-app.use(express.static(path.join(__dirname, "views")));
-
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "views", "index.html"));
-});
 
 export default app;

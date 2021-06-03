@@ -58,8 +58,8 @@ class AuthController {
             name: _user.name,
             id: _user._id,
             role: _user.role.name,
-            accessToken: createAcessToken(_user),
           },
+          accessToken: createAcessToken(_user),
         });
       }
     } else res.json({ ok: false });
